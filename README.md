@@ -8,7 +8,7 @@
 > 核心设计只有一句：**假设是全局实体，不属于任何一个课题。**
 > 同一条假设在三个课题里可以分别是根前提、中层节点和已证叶子——
 > 所以一次实验的证据会同时落到所有引用它的课题上，而推翻它的后果，三边各不相同。
-> 展开讲在 [docs/CONCEPTS.zh-CN.md](docs/CONCEPTS.zh-CN.md)。
+> 展开讲在 [docs/CONCEPTS.zh-CN.md](docs/CONCEPTS.zh-CN.md)（[English](docs/CONCEPTS.md)）。
 
 ![总览界面](public/assets/hero-zh.png)
 
@@ -89,6 +89,15 @@ npm run demo-project                     # 用仓库自带的样例目录试试
 项目还没有的板块显示空状态。
 
 完整字段契约：[docs/DATA.md](docs/DATA.md)（英文，面向机器的规格）。
+
+---
+
+## 文档
+
+| | |
+| --- | --- |
+| [docs/CONCEPTS.zh-CN.md](docs/CONCEPTS.zh-CN.md) | 森林模型详解：共享假设、带符号证据、裁定如何传播 |
+| [docs/DATA.md](docs/DATA.md) | 接入真实项目的文件契约（英文） |
 
 ---
 

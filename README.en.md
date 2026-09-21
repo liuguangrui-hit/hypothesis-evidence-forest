@@ -10,7 +10,7 @@ shared network of hypotheses. Front end and back end, no dependencies, `npm star
 > to no single project.** The same hypothesis can be a root premise in one project, a middle
 > node in another and a proven leaf in a third — so evidence from one run lands on every
 > project that cites it, and overturning it costs each of them something different.
-> The long version: [docs/CONCEPTS.zh-CN.md](docs/CONCEPTS.zh-CN.md) (Chinese).
+> The long version: [docs/CONCEPTS.md](docs/CONCEPTS.md).
 
 ![Overview screen](public/assets/hero-en.png)
 
@@ -101,6 +101,13 @@ single-language strings show on both sides of the switch, and sections a project
 filled in render as empty states.
 
 The full field contract is in [docs/DATA.md](docs/DATA.md).
+
+## Documentation
+
+| | |
+| --- | --- |
+| [docs/CONCEPTS.md](docs/CONCEPTS.md) | the forest model: shared hypotheses, signed evidence, how a verdict propagates |
+| [docs/DATA.md](docs/DATA.md) | the file contract for connecting a real project |
 
 ---
 
