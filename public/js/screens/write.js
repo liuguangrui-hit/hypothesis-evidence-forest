@@ -1,5 +1,5 @@
 // Verdicts and writing: verdict queue, manuscript, claims vs evidence, figures, rebuttal.
-import { html, useState, useScreen, Frame, Card, Kpi, Loading, Empty, Editable, Evidence, Meter,
+import { html, useState, useScreen, Frame, Card, Table, Kpi, Loading, Empty, Editable, Evidence, Meter,
   t, L, I, St, Bar, Score, IdeaTag, ic, dur, ago, md, clock, stLabel } from './common.js';
 import { go, qs } from '../app.js';
 const F = ({ children }) => children;
@@ -232,7 +232,7 @@ export function Claims({ q, onShell }) {
     <div class="cols2">
       <${Card} title=${L('断言 · 证据对照', 'Claims versus evidence')}
         sub=${L('扫描会挑出「任何 / 普遍 / 始终」这类词，再回去找证据里的适用范围', 'the scan flags words like “any / generally / always”, then checks the scope in the evidence')}>
-        <table><thead><tr><th style="width:36px">${L('节', '§')}</th><th>${L('断言', 'Claim')}</th><th style="width:52px">${L('假设', 'Hyp')}</th><th style="width:86px">${L('证据', 'Evidence')}</th><th style="width:78px">${L('状态', 'Status')}</th></tr></thead>
+        <${Table}><thead><tr><th style="width:36px">${L('节', '§')}</th><th>${L('断言', 'Claim')}</th><th style="width:52px">${L('假设', 'Hyp')}</th><th style="width:86px">${L('证据', 'Evidence')}</th><th style="width:78px">${L('状态', 'Status')}</th></tr></thead>
           <tbody>
             ${shown.map((c) => html`<tr class=${'clickable' + (sel?.id === c.id ? ' on' : '')} onClick=${() => go(qs({ c: c.id }))}>
               <td class="mono tiny">${c.sec}</td>
@@ -241,7 +241,7 @@ export function Claims({ q, onShell }) {
               <td class="mono tiny mut">${c.ev.join(' ') || L('无', 'none')}</td>
               <td><span class=${'chip ' + (c.status === 'supported' ? 'ok' : c.status === 'overclaim' ? 'bad' : 'warn')}>${stLabel(c.status)}</span></td>
             </tr>`)}
-          </tbody></table>
+          </tbody><//>
         <div class="ft" style="margin:13px -14px -13px">${L(`还有 ${d.collapsed} 条已支撑的断言未展开`, `${d.collapsed} more supported claims are collapsed`)}
           <div class="grow"></div>
           ${d.gate ? html`<span class="chip bad">${L('导出会被拦下', 'export will be halted')}</span>` : html`<span class="chip ok">${L('导出检查通过', 'export check passes')}</span>`}</div>
@@ -339,10 +339,10 @@ export function Figures({ q, onShell }) {
           </div>
         <//>`}
         <${Card} title=${L('来源', 'Provenance')} sub=${L('8 / 8 可追溯', '8 / 8 traceable')}>
-          <table><tbody>
+          <${Table}><tbody>
             ${[[L('运行', 'Run'), 'run_2291 · seed 0/1/2'], [L('数据', 'Data'), 'metrics.csv @ e_15'], [L('脚本', 'Script'), 'figs/fig3.py'], [L('用在', 'Used in'), L('4.2 节第 1 段', '§4.2, paragraph 1')]].map(([k, v]) => html`
               <tr><td class="tiny faint" style="width:60px">${k}</td><td class="mono small">${v}</td></tr>`)}
-          </tbody></table>
+          </tbody><//>
         <//>
         <${Card} title=${L('版本', 'Versions')}>
           ${f.versions.map((v) => html`

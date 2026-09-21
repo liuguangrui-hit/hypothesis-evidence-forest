@@ -1,5 +1,5 @@
 // Experiments: single run, four-stage experiment tree, sweep matrix, compute & failures.
-import { html, useState, useEffect, useRef, useScreen, Frame, Card, Kpi, Loading, Empty, Editable, Evidence, Meter,
+import { html, useState, useEffect, useRef, useScreen, Frame, Card, Table, Kpi, Loading, Empty, Editable, Evidence, Meter,
   t, L, I, St, Bar, Score, IdeaTag, ic, dur, ago, hm, clock, stLabel } from './common.js';
 import { go, qs } from '../app.js';
 const F = ({ children }) => children;
@@ -56,13 +56,13 @@ export function Experiments({ q, onShell }) {
           right=${html`<div class="row">
             <button class="btn xs" onClick=${() => setEdit(!edit)}>${edit ? L('完成', 'Done') : L('修改配置', 'Edit config')}</button>
             <button class="btn xs" onClick=${() => act('exp.copy', { exp: e.id })}>${L('复制为新实验', 'Copy as new')}</button></div>`}>
-          <table><tbody>
+          <${Table}><tbody>
             ${[['model', L('模型', 'Model')], ['batch', 'batch'], ['seed', 'seed'], ['opt', L('优化器', 'Optimiser')], ['steps', L('步数', 'Steps')], ['measure', L('测量', 'Measure')]].map(([k, lab]) => html`
               <tr><td class="tiny faint" style="width:78px">${lab}</td>
                 <td>${edit
                   ? html`<input type="text" value=${e.cfg[k]} onBlur=${(ev) => ev.target.value !== e.cfg[k] && act('exp.config', { exp: e.id, cfg: { [k]: ev.target.value } })} />`
                   : html`<span class="mono small">${e.cfg[k]}</span>`}</td></tr>`)}
-          </tbody></table>
+          </tbody><//>
         <//>
 
         <${Card} title=${L('实时输出', 'Live output')} sub="events.jsonl · module=executor"
@@ -78,11 +78,11 @@ export function Experiments({ q, onShell }) {
                 <span style="color:#6B7482">${hm(r.t)}</span>  ${r.en && L(r.text, r.en) || r.text}${r.live ? html`<span class="pulse"> ▌</span>` : ''}</div>`)}
             </div>`}
           ${e.status === 'running' && html`<div style="margin-top:9px"><${Bar} v=${e.prog} /></div>`}
-          ${e.table && html`<table style="margin-top:11px"><thead><tr><th>batch</th><th>noise</th><th>eff_step</th><th></th></tr></thead><tbody>
+          ${e.table && html`<${Table} style="margin-top:11px"><thead><tr><th>batch</th><th>noise</th><th>eff_step</th><th></th></tr></thead><tbody>
             ${e.table.map((r) => html`<tr>
               <td class="mono">${r.b}</td><td class="mono">${r.noise ?? '—'}</td><td class="mono">${r.eff ?? '—'}</td>
               <td class="tiny mut">${r.state === 'done' ? '' : r.state === 'running' ? L('运行中', 'running') : L('排队', 'queued')}</td></tr>`)}
-          </tbody></table>`}
+          </tbody><//>`}
           ${e.sweep && html`<div class="note" style="margin-top:9px">${L('拟合斜率 −0.49，与 H-11 断言的 −0.5 一致。', 'Fitted slope −0.49, consistent with the −0.5 asserted by H-11.')}
             <a href="/sweep" style="margin-left:6px">${L('看扫描矩阵 →', 'Sweep matrix →')}</a></div>`}
         <//>
@@ -149,7 +149,7 @@ export function ExpTree({ q, onShell }) {
     <span class="chip">${L('本 idea 已用', 'Used')} ${d.budget.used} / ${d.budget.total} GPU·h</span>`}>
     <div class="cols2">
       <${Card} title=${L('实验树 · 四阶段', 'Experiment tree · four stages')} sub=${L('节点类型：新写 / 修错 / 改进 —— 失败节点不删，留着避免重犯', 'Node kinds: new / fix / improve — failed nodes are kept so mistakes are not repeated')}>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+        <div class="experiment-stages" style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
           ${STAGES.map(([s, zh, en]) => html`
             <div>
               <div class="row" style="margin-bottom:7px"><span class="tiny b faint">${L(zh, en)}</span><span class="tag">${byStage(s).length}</span></div>
@@ -175,7 +175,7 @@ export function ExpTree({ q, onShell }) {
           sub=${L(`${STAGES.find((s) => s[0] === cur.stage)?.[1]}阶段 · ${cur.type}`, `${STAGES.find((s) => s[0] === cur.stage)?.[2]} stage · ${cur.type}`)}>
           <div style="line-height:1.75">${t(cur.summary)}</div>
           <div class="hr"></div>
-          <table><tbody>
+          <${Table}><tbody>
             ${cur.parent && html`<tr><td class="tiny faint" style="width:76px">${L('父节点', 'Parent')}</td>
               <td><span class="mono small" style="cursor:pointer;color:var(--acc)" onClick=${() => setSel(cur.parent)}>${cur.parent}</span>
                 ${d.nodes.find((n) => n.id === cur.parent)?.score != null && html`<span class="tiny mut"> · ${L('得分', 'score')} ${d.nodes.find((n) => n.id === cur.parent).score}</span>`}</td></tr>`}
@@ -184,7 +184,7 @@ export function ExpTree({ q, onShell }) {
             ${cur.exp && html`<tr><td class="tiny faint">${L('运行', 'Run')}</td><td><a class="mono small" href=${'/experiments?e=' + cur.exp}>${cur.exp}</a>
               ${cur.prog != null && html`<span class="tiny mut"> · ${Math.round(cur.prog * 100)}% · ${dur(cur.etaMs)}</span>`}</td></tr>`}
             <tr><td class="tiny faint">${L('本节点得分', 'Score')}</td><td>${cur.score != null ? html`<span class="num">${cur.score}</span>` : html`<span class="tiny mut">${L('待定 · 需 3 个种子', 'pending · needs 3 seeds')}</span>`}</td></tr>
-          </tbody></table>
+          </tbody><//>
           <div class="hr"></div>
           <div class="row">
             <button class="btn sm acc" onClick=${() => act('tree.expand', { node: cur.id })}>${L('从这里展开子节点', 'Expand a child here')}</button>
@@ -227,7 +227,7 @@ export function Sweep({ q, onShell }) {
     <span class="tiny faint">${L(`${d.cells.length} 格 · 配对 t 检验 α = ${d.alpha}`, `${d.cells.length} cells · paired t-test α = ${d.alpha}`)}</span>`}>
     <div class="cols2">
       <${Card} title=${L('运行矩阵', 'Run matrix')} sub=${L('每格一次运行，颜色深浅＝取值', 'one run per cell; shade = value')}>
-        <table><thead><tr><th>batch</th><th>seed 0</th><th>seed 1</th><th>seed 2</th><th>${L('均值', 'Mean')}</th><th>${L('标准差', 'SD')}</th><th>${L('状态', 'State')}</th></tr></thead>
+        <${Table}><thead><tr><th>batch</th><th>seed 0</th><th>seed 1</th><th>seed 2</th><th>${L('均值', 'Mean')}</th><th>${L('标准差', 'SD')}</th><th>${L('状态', 'State')}</th></tr></thead>
           <tbody>
             ${d.rows.map((r) => html`<tr>
               <td class="mono b">${r.b}</td>
@@ -240,7 +240,7 @@ export function Sweep({ q, onShell }) {
               <td class="mono tiny mut">${r.sd != null ? '±' + r.sd : '—'}</td>
               <td>${r.state === 'done' ? html`<${St} s="done" />` : r.state === 'oom' ? html`<span class="chip bad">${L('OOM · 重试中', 'OOM · retrying')}</span>` : html`<${St} s=${r.state} />`}</td>
             </tr>`)}
-          </tbody></table>
+          </tbody><//>
         <div class="note warn" style="margin-top:11px">${d.filled
           ? L('batch = 2048 一行已补满，参与拟合。', 'The batch = 2048 row is now filled and joins the fit.')
           : L('batch = 2048 三格全部 OOM，已按自动策略降到 1024 重试；缺格不参与拟合，也不写进证据。', 'All three cells at batch = 2048 hit OOM and were retried at 1024. Missing cells do not join the fit and never become evidence.')}
@@ -277,22 +277,22 @@ export function Sweep({ q, onShell }) {
         <//>
 
         <${Card} title=${L('代表配置', 'Representative config')}>
-          <table><tbody>
+          <${Table}><tbody>
             ${[['batch', d.rep.b], ['seed', d.rep.s], ['lr', d.rep.lr], [L('运行 id', 'run id'), d.rep.run], [L('产物', 'Artifacts'), 'fig_3.png · metrics.csv']].map(([k, v]) => html`
               <tr><td class="tiny faint" style="width:70px">${k}</td><td class="mono small">${v}</td></tr>`)}
-          </tbody></table>
+          </tbody><//>
           <div class="note" style="margin-top:9px">${L('图 3 用的就是这一格；换代表配置会同时重画图 3 并标记 4.2 节待更新。',
             'Figure 3 comes from this cell. Changing the representative config redraws Figure 3 and flags §4.2 for update.')}
             <a href="/figures" style="margin-left:6px">${L('图表工作台 →', 'Figures →')}</a></div>
         <//>
 
         <${Card} title=${L('这张矩阵要花多少', 'What this matrix costs')}>
-          <table><tbody>
+          <${Table}><tbody>
             <tr><td class="tiny faint">${L('已用 GPU·h', 'GPU·h spent')}</td><td class="num">${d.gpuh}</td></tr>
             <tr><td class="tiny faint">${L('剩余格预计', 'Remaining cells')}</td><td class="num">${d.filled ? 0 : d.remain}</td></tr>
             <tr><td class="tiny faint">${L('本 idea 预算', 'Project budget')}</td><td class="num">${d.budget.total}</td></tr>
             <tr><td class="tiny faint">${L('补满 2048 三格', 'Filling the 2048 row')}</td><td class="num">${d.filled ? L('已补', 'done') : '+11.0'}</td></tr>
-          </tbody></table>
+          </tbody><//>
           <div class="note warn" style="margin-top:9px">${L('补满 2048 会吃掉近一成预算，而它只影响外推那一段的措辞。executor 的建议是先不补，把那句改成推测语气。',
             'Filling 2048 eats nearly a tenth of the budget and only affects the wording of one extrapolated sentence. The executor suggests softening the sentence instead.')}</div>
           <div class="row" style="margin-top:10px">
@@ -353,7 +353,7 @@ export function Runs({ q, onShell }) {
 
         <${Card} title=${L('运行', 'Runs')} sub=${L('每一行都可以追到节点、假设和产物', 'every row traces back to a node, a hypothesis and its artifacts')}
           right=${html`<span class="tiny faint">${L('时长 / 成本为实测', 'duration / cost measured')}</span>`}>
-          <table><thead><tr><th style="width:92px">id</th><th>${L('目标', 'Target')}</th><th style="width:118px">${L('资源', 'Resources')}</th><th style="width:60px">${L('时长', 'Time')}</th><th style="width:60px">${L('成本', 'Cost')}</th><th style="width:76px">${L('状态', 'State')}</th></tr></thead>
+          <${Table}><thead><tr><th style="width:92px">id</th><th>${L('目标', 'Target')}</th><th style="width:118px">${L('资源', 'Resources')}</th><th style="width:60px">${L('时长', 'Time')}</th><th style="width:60px">${L('成本', 'Cost')}</th><th style="width:76px">${L('状态', 'State')}</th></tr></thead>
             <tbody>
               ${(tab === 'queue' ? d.queued : tab === 'fail' ? d.history.filter((r) => r.status === 'failed') : [...d.live, ...d.history.filter((r) => r.status !== 'failed')]).slice(0, 14).map((r) => html`
                 <tr class="clickable" onClick=${() => r.id.startsWith('e_') && go('/experiments?e=' + r.id)}>
@@ -364,7 +364,7 @@ export function Runs({ q, onShell }) {
                   <td class="mono tiny">${r.cost ? '¥ ' + r.cost : '—'}</td>
                   <td><${St} s=${r.status} /></td>
                 </tr>`)}
-            </tbody></table>
+            </tbody><//>
         <//>
       </div>
 

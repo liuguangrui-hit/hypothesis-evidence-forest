@@ -43,6 +43,9 @@ export const Frame = ({ tools, children }) => html`
 const Fr = ({ children }) => children;
 export const Fragment = Fr;
 
+// Keep wide data tables scrollable without moving the whole phone viewport.
+export const Table = ({ children, ...props }) => html`<div class="table-scroll" role="region" aria-label=${L('数据表格，可横向滑动', 'Data table, scroll horizontally')} tabIndex="0"><div class="table-hint">${L('← 左右滑动查看完整表格 →', '← Swipe to see the full table →')}</div><table ...${props}>${children}</table></div>`;
+
 export const Card = ({ title, sub, right, children, foot, style }) => html`
   <div class="card" style=${style}>
     ${(title || right) && html`<div class="hd"><h2>${title}</h2>${sub && html`<span class="sub2">${sub}</span>`}<div class="grow"></div>${right}</div>`}

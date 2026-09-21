@@ -72,7 +72,7 @@ for (const n of NAV) { GROUP[n.k] = n.k; for (const s of n.subs || []) GROUP[s.k
 
 function Side({ screen, counts, ideas, agents, open, onClose }) {
   const group = GROUP[screen] || screen;
-  return html`<nav class=${'side' + (open ? ' open' : '')} onClick=${(e) => e.target.closest('a') && onClose()}>
+  return html`<nav id="workbench-nav" aria-label=${L('工作流导航', 'Workflow navigation')} class=${'side' + (open ? ' open' : '')} onClick=${(e) => e.target.closest('a') && onClose()}>
     <div class="cap">${L('工作流', 'WORKFLOW')}</div>
     ${NAV.map((n) => html`<${Fragment2}>
       <a class=${'nav' + (group === n.k ? ' on' : '')} href=${'/' + n.k}>
@@ -100,7 +100,7 @@ function Side({ screen, counts, ideas, agents, open, onClose }) {
 }
 const Fragment2 = ({ children }) => children;
 
-function Top({ screen, shell, onMenu }) {
+function Top({ screen, shell, onMenu, open }) {
   const c = shell.counts;
   const title = (() => {
     for (const n of NAV) { if (n.k === screen) return L(n.zh, n.en); for (const s of n.subs || []) if (s.k === screen) return L(s.zh, s.en); }
@@ -109,15 +109,15 @@ function Top({ screen, shell, onMenu }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const i = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(i); }, []);
   return html`<header class="topbar">
-    <button class="btn xs menub" onClick=${onMenu} aria-label=${L('菜单', 'Menu')}>${I('menu', { s: 14 })}</button>
+    <button class="btn xs menub" onClick=${onMenu} aria-label=${L(open ? '关闭菜单' : '菜单', open ? 'Close menu' : 'Menu')} aria-expanded=${open} aria-controls="workbench-nav">${I(open ? 'x' : 'menu', { s: 18 })}</button>
     <a class="brand" href="/">${I('logo', { s: 19, c: 'var(--ink)', w: 1.8 })}<span>AI Scientist</span></a>
     <span class="crumb">${title}</span>
     <span class="mono small b hide-s">${clock(now)}</span>
     <div class="grow"></div>
     <span class="small mut hide-s">${L(`昨夜自动运行 ${dur(shell.now - shell.createdAt + 33120000)} · 无人值守`, `Ran unattended for ${dur(shell.now - shell.createdAt + 33120000)}`)}</span>
     <${SourceBadge} src=${shell.source} />
-    <button class="btn xs" onClick=${() => setLang(LANG === 'zh' ? 'en' : 'zh')} title="Language">${LANG === 'zh' ? 'EN' : '中文'}</button>
-    ${c.pending > 0 && screen !== 'review' && html`<a class="btn sm" href="/review" style="color:var(--warn);border-color:var(--warnln)">${I('warn', { s: 13, c: 'var(--warn)' })}${c.pending}</a>`}
+    <button class="btn xs lang-toggle" onClick=${() => setLang(LANG === 'zh' ? 'en' : 'zh')} title="Language">${LANG === 'zh' ? 'EN' : '中文'}</button>
+    ${c.pending > 0 && screen !== 'review' && html`<a class="btn sm pending-link" aria-label=${L(`${c.pending} 项待裁定`, `${c.pending} pending verdicts`)} href="/review" style="color:var(--warn);border-color:var(--warnln)">${I('warn', { s: 13, c: 'var(--warn)' })}${c.pending}</a>`}
     <a class="btn sm pri hide-s" href=${screen === 'main' ? '/home' : '/main'}>${screen === 'main' ? L('看总览', 'Overview') : L('进工作台', 'Workbench')}</a>
   </header>`;
 }
@@ -125,9 +125,9 @@ function Top({ screen, shell, onMenu }) {
 // Which data you are looking at: the private demo workspace, or a live project
 // directory on disk (read-only when the process cannot write to it).
 function SourceBadge({ src }) {
-  if (!src || src.mode === 'demo') return html`<span class="chip" title=${L('每位访客独立会话；不调用真实模型或实验执行器。试玩记录可能重置。', 'Private session per visitor; no live models or experiment executors. Trial data may reset.')}>${L('演示数据 · 模拟实验', 'Demo data · simulated experiments')}</span>`;
+  if (!src || src.mode === 'demo') return html`<span class="chip source-badge" title=${L('每位访客独立会话；不调用真实模型或实验执行器。试玩记录可能重置。', 'Private session per visitor; no live models or experiment executors. Trial data may reset.')}>${L('演示数据 · 模拟实验', 'Demo data · simulated experiments')}</span>`;
   const bad = src.problems > 0;
-  return html`<span class=${'chip ' + (bad ? 'warn' : 'ok')} title=${L('接入的真实项目目录', 'The live project directory in use')}>
+  return html`<span class=${'chip source-badge ' + (bad ? 'warn' : 'ok')} title=${L('接入的真实项目目录', 'The live project directory in use')}>
     ${src.readonly ? L('真实项目 · 只读', 'Live project · read-only') : L('真实项目', 'Live project')}
     ${bad ? ' · ' + L(`${src.problems} 条数据问题`, `${src.problems} data problems`) : ''}</span>`;
 }
@@ -146,13 +146,38 @@ function Workbench({ screen, q }) {
   const Screen = SCREENS[screen];
   const onShell = useCallback((s) => setShell(s), []);
   useEffect(() => { setOpen(false); }, [screen]);
+  useEffect(() => {
+    const wide = matchMedia('(min-width:1021px)');
+    const close = () => { if (wide.matches) setOpen(false); };
+    wide.addEventListener('change', close);
+    return () => wide.removeEventListener('change', close);
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const nav = document.getElementById('workbench-nav');
+    nav?.querySelector('a')?.focus();
+    const key = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Tab') return;
+      const items = [...nav.querySelectorAll('a, button, select')];
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', key);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', key); previous?.focus(); };
+  }, [open]);
   if (!Screen) return html`<${NotFound} />`;
   // Top and Side always render (with an empty shell before the first payload):
   // conditionally mounting them would shift <main> and remount the screen.
   const s = shell || EMPTY_SHELL;
   return html`<div class="app">
-    <${Top} screen=${screen} shell=${s} onMenu=${() => setOpen((o) => !o)} />
+    <${Top} screen=${screen} shell=${s} open=${open} onMenu=${() => setOpen((o) => !o)} />
     <div class="body">
+      ${open && html`<button class="nav-backdrop" aria-label=${L('关闭导航', 'Close navigation')} tabIndex="-1" onClick=${() => setOpen(false)}></button>`}
       <${Side} screen=${screen} counts=${s.counts} ideas=${s.ideas} agents=${s.agents} open=${open} onClose=${() => setOpen(false)} />
       <main class="main"><${Screen} q=${q} onShell=${onShell} /></main>
     </div>

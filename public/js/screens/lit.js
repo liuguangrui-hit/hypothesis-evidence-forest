@@ -1,5 +1,5 @@
 // Literature: collection pipeline, trends, sparks, paper detail.
-import { html, useState, useScreen, Frame, Card, Kpi, Loading, Empty, Editable, t, L, I, St, Bar, IdeaTag, dur, ago, md, clock } from './common.js';
+import { html, useState, useScreen, Frame, Card, Table, Kpi, Loading, Empty, Editable, t, L, I, St, Bar, IdeaTag, dur, ago, md, clock } from './common.js';
 import { go, qs } from '../app.js';
 const F = ({ children }) => children;
 
@@ -41,7 +41,7 @@ export function Survey({ q, onShell }) {
     </div>
 
     ${tab === 'venues' && html`<div class="card" style="border-radius:0 0 7px 7px"><div class="bd" style="padding:0">
-      <table><thead><tr>
+      <${Table}><thead><tr>
         <th style="width:96px">id</th><th>${L('来源', 'Source')}</th><th style="width:118px">${L('类型 · 等级', 'Type · tier')}</th>
         <th style="width:110px">${L('扫法', 'Scan')}</th><th style="width:170px">${L('入口 · 游标', 'Entry · cursor')}</th><th style="width:100px">${L('本轮', 'This round')}</th>
       </tr></thead><tbody>
@@ -53,7 +53,7 @@ export function Survey({ q, onShell }) {
           <td class="mono tiny mut">${v.entry}${v.cursor ? ' · ' + v.cursor : ''}</td>
           <td>${v.status === 'broken' ? html`<${St} s="broken" />` : v.status === 'parked' ? html`<${St} s="parked" />` : html`<span class="num" style="color:var(--ok)">+${v.delta}</span>`}</td>
         </tr>`)}
-      </tbody></table>
+      </tbody><//>
     </div>
     <div class="ft">${L(`其余 ${d.others} 个来源本轮无新增 · 停用清单另存 ${d.parked} 个，采集时不读`, `${d.others} other sources added nothing this round · ${d.parked} parked sources are not read`)}
       <div class="grow"></div><a href="/digest">${L('看一篇入库论文 →', 'Open an indexed paper →')}</a></div></div>`}
@@ -292,11 +292,11 @@ export function Digest({ q, onShell }) {
       </div>
       <div class="col">
         <${Card} title="meta.json" sub=${L('题录与状态', 'record and state')}>
-          <table><tbody>
+          <${Table}><tbody>
             ${[['title', t(p.title)], ['authors', p.authors], ['venue', p.venue], ['year', p.year], ['doi', p.doi || 'null'], ['arxiv_id', p.arxiv || '—'],
               ['status', p.status], ['level', p.level], ['tracks', p.tracks.join(', ')]].map(([k, v]) => html`
               <tr><td class="mono tiny faint" style="width:76px">${k}</td><td class="small">${v}</td></tr>`)}
-          </tbody></table>
+          </tbody><//>
           <div class="note" style="margin-top:10px">${L('include_reason：', 'include_reason: ')}${t(p.reason)}</div>
         <//>
         <${Card} title=${L('落盘目录', 'On disk')} sub=${'sources/papers/' + p.id + '/'}>

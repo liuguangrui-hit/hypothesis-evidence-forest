@@ -1,5 +1,5 @@
 // Overview (Home), global Workbench (Main), and the full event stream.
-import { html, useState, useScreen, Frame, Card, Kpi, Loading, ErrBox, Empty, t, L, I, St, Chip, Bar, Score, IdeaTag, ic, dur, ago, hm, clock, pct, Meter, Evidence } from './common.js';
+import { html, useState, useScreen, Frame, Card, Table, Kpi, Loading, ErrBox, Empty, t, L, I, St, Chip, Bar, Score, IdeaTag, ic, dur, ago, hm, clock, pct, Meter, Evidence } from './common.js';
 import { go } from '../app.js';
 
 export function Home({ q, onShell }) {
@@ -41,12 +41,12 @@ export function Home({ q, onShell }) {
 
         <${Card} title=${L('过去 24 小时', 'The last 24 hours')} sub=${L('系统自己做完的部分', 'What the system did on its own')}
           right=${html`<a href="/events">${L('完整事件流 →', 'Full event stream →')}</a>`}>
-          <table><tbody>
+          <${Table}><tbody>
             ${d.last24.map((x) => html`<tr>
               <td style="width:58px;color:var(--faint)">${t(x.label)}</td>
               <td><div class="b">${t(x.head)}</div><div class="small mut" style="margin-top:3px">${t(x.body)}</div></td>
             </tr>`)}
-          </tbody></table>
+          </tbody><//>
           <div class="note" style="margin-top:11px">${L(`这 24 小时里没有人操作过。上一次人工介入是 ${clock(Date.now() - d.unattendedMs)}。`,
             `Nobody touched it in those 24 hours. The last manual step was ${clock(Date.now() - d.unattendedMs)}.`)}</div>
         <//>
@@ -124,7 +124,7 @@ export function Main({ q, onShell }) {
         foot=${html`<button class="btn sm pri" onClick=${() => act('exp.runBatch', { hyps: fr.filter((f) => !f.queued).slice(0, 3).map((f) => f.id) })}>
             ${L('按顺序批量开跑前 3 条', 'Queue the top 3 in order')}</button>
           <span class="tiny faint">${L('服务多个 idea 的优先', 'Multi-project hypotheses go first')}</span>`}>
-        <table><tbody>
+        <${Table} class="frontier-table"><tbody>
           ${fr.map((f) => html`<tr class="clickable" onClick=${() => go('/panorama?h=' + f.id)}>
             <td style="width:112px">${f.ideas.map((i) => html`<${IdeaTag} id=${i} />`)}</td>
             <td style="width:52px" class="mono b">${f.id}</td>
@@ -137,7 +137,7 @@ export function Main({ q, onShell }) {
                 : html`<button class="btn xs acc" onClick=${() => act('exp.run', { hyp: f.id })}>${L('运行实验', 'Run')}</button>`}
             </td>
           </tr>`)}
-        </tbody></table>
+        </tbody><//>
       <//>
 
       <div class="col">
@@ -196,7 +196,7 @@ export function Events({ q, onShell }) {
       ${Object.entries(KINDS).map(([k, lab]) => html`<button class=${kind === k ? 'on' : ''} onClick=${() => setKind(k)}>${lab}</button>`)}
     </div><div class="grow"></div><span class="mono tiny faint">events.jsonl · ${d.list.length} ${L('行', 'lines')}</span>`}>
     <${Card} title=${L('事件流', 'Event stream')} sub=${L('每个 agent 只写自己的行，人工动作也记在这里', 'Each agent writes only its own lines; manual actions are logged too')}>
-      <table><tbody>
+      <${Table}><tbody>
         ${d.list.map((e) => html`<tr>
           <td style="width:88px" class="mono tiny faint">${hm(e.t)}<div>${ago(e.t)}</div></td>
           <td style="width:74px"><span class="tag">${e.mod}</span></td>
@@ -206,7 +206,7 @@ export function Events({ q, onShell }) {
             ${e.exp && html`<a class="mono tiny" href=${'/experiments?e=' + e.exp} style="margin-left:6px">${e.exp}</a>`}
           </td>
         </tr>`)}
-      </tbody></table>
+      </tbody><//>
     <//>
   <//>`;
 }

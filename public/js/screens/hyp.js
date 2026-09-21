@@ -1,5 +1,5 @@
 // Hypotheses: idea intake, the global panorama graph, shared-hypothesis view, single-idea tree.
-import { html, useState, useEffect, useRef, useMemo, useScreen, Frame, Card, Kpi, Loading, Empty, Editable, Evidence, Meter,
+import { html, useState, useEffect, useRef, useMemo, useScreen, Frame, Card, Table, Kpi, Loading, Empty, Editable, Evidence, Meter,
   t, L, I, St, Chip, Bar, Score, IdeaTag, ic, dur, ago, clock, stLabel } from './common.js';
 import { go, qs } from '../app.js';
 const F = ({ children }) => children;
@@ -45,7 +45,7 @@ export function Ideas({ q, onShell }) {
             <button class="btn sm" onClick=${() => act('idea.park', {})}>${L('存为候选', 'Save as candidate')}</button>
             <div class="grow"></div>
             <span class="tiny faint">${L('立项后并行执行，与现有 idea 共用 executor 槽位', 'Once launched it runs in parallel, sharing the executor slots')}</span>`}>
-          <table><tbody>
+          <${Table}><tbody>
             ${c.plan.map((p, i) => html`<tr>
               <td style="width:52px" class="mono b">${p.hyp || L('新', 'new')}</td>
               <td>${t(p.hyp ? p.claim : p.claim)}
@@ -62,12 +62,12 @@ export function Ideas({ q, onShell }) {
                 </div>
               </td>
             </tr>`)}
-          </tbody></table>
+          </tbody><//>
         <//>
 
         <${Card} title=${L('文献池', 'Literature pool')} sub=${L('与当前候选相关 · 勾选后可抽假设', 'related to this candidate · tick to extract hypotheses')}
           right=${html`<button class="btn xs" onClick=${() => act('idea.extract', {})}>${L('从选中文献抽假设', 'Extract from selected')}</button>`}>
-          <table><tbody>
+          <${Table}><tbody>
             ${d.lit.map((p) => html`<tr class="clickable" onClick=${() => act('idea.lit', { id: p.id })}>
               <td style="width:26px">${p.selected ? I('check', { s: 14, c: 'var(--acc)' }) : html`<span style="display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:3px"></span>`}</td>
               <td>${t(p.title)}</td>
@@ -75,7 +75,7 @@ export function Ideas({ q, onShell }) {
               <td style="width:130px">${p.extracted ? html`<span class="chip ok">${L(`已抽出 ${p.hyps.length} 条`, `${p.hyps.length} extracted`)}<br/></span>` : html`<span class="chip">${L('待抽取', 'to extract')}</span>`}
                 <div class="mono tiny faint">${p.hyps.join(' ')}</div></td>
             </tr>`)}
-          </tbody></table>
+          </tbody><//>
         <//>
       </div>
 
@@ -123,6 +123,11 @@ export function Panorama({ q, onShell }) {
   const [color, setColor] = useState('status');
   const [hidden, setHidden] = useState({});
   const [labels, setLabels] = useState(true);
+  useEffect(() => {
+    if (q.h && data?.panorama?.sel?.id === q.h && matchMedia('(max-width:760px)').matches) {
+      document.getElementById('hypothesis-detail')?.scrollIntoView({ block: 'start' });
+    }
+  }, [q.h, data?.panorama?.sel?.id]);
   if (!data) return html`<${Loading} />`;
   const d = data.panorama;
   const sel = d.sel;
@@ -136,8 +141,14 @@ export function Panorama({ q, onShell }) {
     <button class=${'btn sm' + (labels ? ' acc' : '')} onClick=${() => setLabels(!labels)}>${L('节点标签', 'Labels')}</button>
     <div class="grow"></div>
     <span class="tiny faint hide-s">${L('滚轮缩放 · 拖拽平移 · 拖节点可移动', 'Scroll to zoom · drag to pan · drag a node to move it')}</span>`}>
+    <label class="mobile-only graph-picker">${L('选择假设查看详情', 'Choose a hypothesis to inspect')}
+      <select value=${sel?.id || ''} onChange=${(e) => go(qs({ h: e.target.value || null }))}>
+        <option value="">${L('选择一条假设…', 'Choose a hypothesis…')}</option>
+        ${d.nodes.map((n) => html`<option value=${n.id}>${n.id} · ${t(n.claim)}</option>`)}
+      </select>
+    </label>
     <div class="cols2">
-      <${Graph} d=${d} color=${color} hidden=${hidden} labels=${labels} sel=${sel?.id} key="g" 
+      <${Graph} d=${d} color=${color} hidden=${hidden} labels=${labels} sel=${sel?.id} key="g"
         onPick=${(id) => go(qs({ h: id }))} />
       <div class="col">
         <div class="kpis">
@@ -152,7 +163,7 @@ export function Panorama({ q, onShell }) {
           <div class="tiny faint" style="margin-top:8px">${L('粗圈＝被多个 idea 引用 · 蓝虚线＝归纳边 · 灰虚线＝跨 idea 依赖',
             'Thick ring = cited by several projects · blue dashes = induced edge · grey dashes = cross-project dependency')}</div>
         <//>
-        ${sel ? html`<${HypPanel} sel=${sel} act=${act} />` : html`<${Card} title=${L('选择一个节点', 'Pick a node')}><${Empty}>${L('点图里的任意节点查看详情。', 'Click any node in the graph.')}<//><//>`}
+        <div id="hypothesis-detail">${sel ? html`<${HypPanel} sel=${sel} act=${act} />` : html`<${Card} title=${L('选择一个节点', 'Pick a node')}><${Empty}>${L('点图里的任意节点查看详情。', 'Click any node in the graph.')}<//><//>`}</div>
         <${Card} title=${L('活动', 'Activity')}>
           ${d.events.map((e) => html`<div class="row" style="padding:4px 0">
             <span class="mono tiny faint" style="width:40px">${clock(e.t).slice(11)}</span><span class="small">${t(e.title)}</span></div>`)}
@@ -168,16 +179,24 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
   const [vb, setVb] = useState({ x: box.x, y: box.y, w: box.w });
   const [pos, setPos] = useState({});
   const drag = useRef(null);
-  const [h, setH] = useState(660);
-  const [w, setW] = useState(900);
+  const [h, setH] = useState(0);
+  const [w, setW] = useState(0);
+  const [mobile, setMobile] = useState(() => matchMedia('(max-width:760px)').matches);
+  const [interact, setInteract] = useState(false);
   useEffect(() => {
-    const f = () => { setH(Math.max(420, innerHeight - 190)); setW(wrap.current?.clientWidth || 900); };
-    f(); addEventListener('resize', f); return () => removeEventListener('resize', f);
+    const f = () => {
+      const narrow = matchMedia('(max-width:760px)').matches;
+      setMobile(narrow);
+      setH(narrow ? Math.min(480, Math.max(300, Math.round(innerHeight * .5))) : Math.max(420, innerHeight - 190));
+      setW(wrap.current?.clientWidth || 900);
+    };
+    const observer = new ResizeObserver(f);
+    observer.observe(wrap.current);
+    f(); addEventListener('resize', f);
+    return () => { observer.disconnect(); removeEventListener('resize', f); };
   }, []);
-  const fitted = useRef(false);
   useEffect(() => {
-    if (fitted.current || !w || !h) return;
-    fitted.current = true;
+    if (!w || !h) return;
     const aspect = h / Math.max(1, w);
     const width = Math.max(box.w, box.h / Math.max(0.2, aspect));
     setVb({ x: box.x - (width - box.w) / 2, y: box.y - ((width * aspect) - box.h) / 2, w: width });
@@ -201,14 +220,16 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
     return { x: vb.x + ((e.clientX - r.left) / r.width) * vb.w, y: vb.y + ((e.clientY - r.top) / r.height) * vbh() };
   };
   const down = (e, node) => {
+    if (mobile && !interact) return;
     e.preventDefault();
     const p = pt(e);
-    drag.current = node ? { node, dx: p.x - at(node).x, dy: p.y - at(node).y, moved: false } : { pan: true, x: e.clientX, y: e.clientY, vb: { ...vb }, moved: false };
+    drag.current = node ? { node, x: e.clientX, y: e.clientY, dx: p.x - at(node).x, dy: p.y - at(node).y, moved: false } : { pan: true, x: e.clientX, y: e.clientY, vb: { ...vb }, moved: false };
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
   const move = (e) => {
     const g = drag.current;
     if (!g) return;
+    if (!g.moved && Math.hypot(e.clientX - g.x, e.clientY - g.y) < 6) return;
     g.moved = true;
     if (g.pan) {
       const r = wrap.current.getBoundingClientRect();
@@ -231,8 +252,8 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
   const zoom = (k) => setVb((v) => ({ ...v, w: v.w * k, x: v.x + (v.w * (1 - k)) / 2, y: v.y + (v.w * (h / Math.max(1, w)) * (1 - k)) / 2 }));
 
   return html`<div class="canvas" ref=${wrap} style=${{ height: h + 'px' }} onWheel=${onWheel}>
-    <svg viewBox=${`${vb.x} ${vb.y} ${vb.w} ${vb.w * (h / Math.max(1, w))}`} width="100%" height=${h} class=${drag.current?.pan ? 'drag' : ''}
-      onPointerDown=${(e) => down(e, null)} onPointerMove=${move} onPointerUp=${up} onPointerLeave=${up} role="img"
+    <svg viewBox=${`${vb.x} ${vb.y} ${vb.w} ${vb.w * (h / Math.max(1, w))}`} width="100%" height=${h} class=${mobile && !interact ? 'touch-scroll' : drag.current?.pan ? 'drag' : ''}
+      onPointerDown=${(e) => down(e, null)} onPointerMove=${move} onPointerUp=${up} onPointerCancel=${() => { drag.current = null; }} role="img"
       aria-label=${L('假设网络图', 'Hypothesis network graph')}>
       <g>${d.ideas.filter((i) => d.centers[i.id]).map((i) => {
         const c = d.centers[i.id];
@@ -256,7 +277,7 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
         const stroke = color === 'idea' ? ic(n.ideas[0]) : STATUS_STROKE[n.status] || '#98A2B3';
         const on = sel === n.id;
         return html`<g class="gnode" transform=${`translate(${p.x},${p.y})`} onPointerDown=${(e) => { e.stopPropagation(); down(e, n); }}
-          onPointerMove=${move} onPointerUp=${up} tabIndex="0" onKeyDown=${(e) => e.key === 'Enter' && onPick(n.id)}>
+          onPointerMove=${move} onPointerUp=${up} onClick=${() => { if (mobile && !interact) onPick(n.id); }} tabIndex="0" onKeyDown=${(e) => e.key === 'Enter' && onPick(n.id)}>
           ${on && html`<circle r=${r + 6} fill="none" stroke="#2F5FE0" stroke-width="1.6" opacity=".55" />`}
           ${n.root
             ? html`<rect x=${-r} y=${-r} width=${r * 2} height=${r * 2} rx="2.5" fill=${fill} stroke=${stroke} stroke-width=${shared ? 3 : 2} />`
@@ -268,6 +289,7 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
       })}</g>
     </svg>
     <div class="zoomer">
+      ${mobile && html`<button class=${'btn xs' + (interact ? ' acc' : '')} aria-pressed=${interact} onClick=${() => { drag.current = null; setInteract(!interact); }}>${interact ? L('完成移动', 'Done moving') : L('移动图谱', 'Move graph')}</button>`}
       <button class="btn xs" onClick=${() => zoom(1.25)} aria-label="zoom out">−</button>
       <button class="btn xs" onClick=${() => zoom(0.8)} aria-label="zoom in">+</button>
       <button class="btn xs" onClick=${fit}>${L('适配', 'Fit')}</button>
@@ -415,11 +437,11 @@ export function Tree({ q, onShell }) {
               ${n.score !== 0 && html`<${Score} v=${n.score} />`}
               ${n.refs > 1 && html`<span class="chip acc mono">${n.refs}</span>`}
             </div>`)}
-        </div>` : html`<table><thead><tr><th>k</th><th>id</th><th>${L('主张', 'Claim')}</th><th>${L('角色', 'Role')}</th><th>${L('状态', 'Status')}</th><th>${L('证据', 'Evidence')}</th><th>idea</th></tr></thead>
+        </div>` : html`<${Table}><thead><tr><th>k</th><th>id</th><th>${L('主张', 'Claim')}</th><th>${L('角色', 'Role')}</th><th>${L('状态', 'Status')}</th><th>${L('证据', 'Evidence')}</th><th>idea</th></tr></thead>
           <tbody>${rows.map((n) => html`<tr class="clickable" onClick=${() => go(qs({ h: n.hyp }))}>
             <td class="mono tiny">${n.k}</td><td class="mono b">${n.hyp}</td><td>${t(n.claim)}</td>
             <td class="tiny mut">${n.role === 'borrowed_assumption' ? L('借用前提', 'borrowed') : L('自证', 'own')}</td>
-            <td><${St} s=${n.status} /></td><td><${Score} v=${n.score} /></td><td class="mono tiny">${n.refs}</td></tr>`)}</tbody></table>`}
+            <td><${St} s=${n.status} /></td><td><${Score} v=${n.score} /></td><td class="mono tiny">${n.refs}</td></tr>`)}</tbody><//>`}
       <//>
       <div class="col">
         ${sel ? html`<${F}>
