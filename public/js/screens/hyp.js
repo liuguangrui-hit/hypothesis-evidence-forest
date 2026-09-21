@@ -123,17 +123,20 @@ export function Panorama({ q, onShell }) {
   const [color, setColor] = useState('status');
   const [hidden, setHidden] = useState({});
   const [labels, setLabels] = useState(true);
+  const [mobile, setMobile] = useState(() => matchMedia('(max-width:760px)').matches);
   useEffect(() => {
-    if (q.h && data?.panorama?.sel?.id === q.h && matchMedia('(max-width:760px)').matches) {
-      document.getElementById('hypothesis-detail')?.scrollIntoView({ block: 'start' });
-    }
-  }, [q.h, data?.panorama?.sel?.id]);
+    const media = matchMedia('(max-width:760px)');
+    const update = () => setMobile(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   if (!data) return html`<${Loading} />`;
   const d = data.panorama;
   const sel = d.sel;
   if (d.empty) return html`<${Frame}><${Card} title=${L('假设网络', 'Hypothesis network')}>
     <${Empty}>${L('还没有假设。接入真实项目后，这里显示 tree.json 里的全部 idea 与假设。',
       'No hypotheses yet. Wired to a real project this shows every idea and hypothesis in tree.json.')}<//><//><//>`;
+  if (mobile) return html`<${MobilePanorama} d=${d} q=${q} act=${act} />`;
   return html`<${Frame} tools=${html`
     <span class="tiny faint">${L('着色', 'Colour')}</span>
     <div class="seg"><button class=${color === 'status' ? 'on' : ''} onClick=${() => setColor('status')}>${L('按状态', 'By status')}</button>
@@ -141,12 +144,6 @@ export function Panorama({ q, onShell }) {
     <button class=${'btn sm' + (labels ? ' acc' : '')} onClick=${() => setLabels(!labels)}>${L('节点标签', 'Labels')}</button>
     <div class="grow"></div>
     <span class="tiny faint hide-s">${L('滚轮缩放 · 拖拽平移 · 拖节点可移动', 'Scroll to zoom · drag to pan · drag a node to move it')}</span>`}>
-    <label class="mobile-only graph-picker">${L('选择假设查看详情', 'Choose a hypothesis to inspect')}
-      <select value=${sel?.id || ''} onChange=${(e) => go(qs({ h: e.target.value || null }))}>
-        <option value="">${L('选择一条假设…', 'Choose a hypothesis…')}</option>
-        ${d.nodes.map((n) => html`<option value=${n.id}>${n.id} · ${t(n.claim)}</option>`)}
-      </select>
-    </label>
     <div class="cols2">
       <${Graph} d=${d} color=${color} hidden=${hidden} labels=${labels} sel=${sel?.id} key="g"
         onPick=${(id) => go(qs({ h: id }))} />
@@ -169,6 +166,77 @@ export function Panorama({ q, onShell }) {
             <span class="mono tiny faint" style="width:40px">${clock(e.t).slice(11)}</span><span class="small">${t(e.title)}</span></div>`)}
         <//>
       </div>
+    </div>
+  <//>`;
+}
+
+// Phone navigation has one surface at a time: list, detail, or optional map.
+// A graph is never mounted above the detail, so it cannot consume its scroll gestures.
+function MobilePanorama({ d, q, act }) {
+  const [search, setSearch] = useState('');
+  const [idea, setIdea] = useState('');
+  const [status, setStatus] = useState('');
+  const listScroll = useRef(0);
+  const lastView = useRef(null);
+  const view = q.h ? 'detail' : q.map === '1' ? 'map' : 'list';
+  const head = useRef(null);
+  useEffect(() => {
+    const area = document.querySelector('.scroll');
+    if (area) area.scrollTop = view === 'list' ? listScroll.current : 0;
+    if (view !== 'list') window.scrollTo(0, 0);
+    if (lastView.current !== null) head.current?.focus({ preventScroll: true });
+    lastView.current = view;
+  }, [view, q.h]);
+  const open = (id) => {
+    if (view === 'list') listScroll.current = document.querySelector('.scroll')?.scrollTop || 0;
+    go(qs({ h: id, map: null }));
+  };
+  const term = search.trim().toLocaleLowerCase();
+  const nodes = d.nodes.filter((n) => (!idea || n.ideas.includes(idea)) && (!status || n.status === status)
+    && (!term || `${n.id} ${t(n.claim)} ${n.ideas.join(' ')}`.toLocaleLowerCase().includes(term)));
+  const heading = view === 'detail' ? L('假设详情', 'Hypothesis detail') : view === 'map' ? L('关系图谱', 'Relationship map') : L('假设清单', 'Hypotheses');
+  const tools = html`
+    ${view !== 'list' && html`<a class="btn sm" href=${qs({ h: null, map: null })}>${L('← 返回清单', '← Back to list')}</a>`}
+    <h1 class="hyp-mobile-title" tabIndex="-1" ref=${head}>${heading}</h1>
+    <div class="grow"></div>
+    ${view === 'list' && html`<button class="btn sm" onClick=${() => {
+      listScroll.current = document.querySelector('.scroll')?.scrollTop || 0;
+      go(qs({ h: null, map: '1' }));
+    }}>${L('查看图谱', 'View map')}</button>`}`;
+  if (view === 'detail') return html`<${Frame} tools=${tools}>
+    ${d.sel?.id === q.h ? html`<div class="hyp-mobile-detail"><${HypPanel} key=${d.sel.id} sel=${d.sel} act=${act} compact=${true} /></div>`
+      : d.nodes.some((n) => n.id === q.h) ? html`<div role="status">${L('正在读取假设…', 'Loading hypothesis…')}</div>`
+      : html`<${Empty}>${L('这条假设不存在，请返回清单选择。', 'Hypothesis not found. Choose one from the list.')}<//>`}
+  <//>`;
+  if (view === 'map') return html`<${Frame} tools=${tools}>
+    <div class="note" style="margin-bottom:10px">${L('点节点直接打开详情。需要平移时开启“移动图谱”；随时可用上方按钮返回清单。',
+      'Tap a node to open its detail. Enable “Move graph” to pan; use the button above to return to the list.')}</div>
+    <${Graph} d=${d} color="status" hidden=${{}} labels=${true} onPick=${open} />
+  <//>`;
+  return html`<${Frame} tools=${tools}>
+    <div class="hyp-filters">
+      <input type="search" aria-label=${L('搜索假设', 'Search hypotheses')} placeholder=${L('搜索编号、主张或 idea', 'Search ID, claim or project')}
+        value=${search} onInput=${(e) => { listScroll.current = 0; setSearch(e.target.value); }} />
+      <div class="hyp-filter-row">
+        <select aria-label=${L('按 idea 筛选', 'Filter by project')} value=${idea} onChange=${(e) => { listScroll.current = 0; setIdea(e.target.value); }}>
+          <option value="">${L('全部 idea', 'All projects')}</option>
+          ${d.ideas.map((i) => html`<option value=${i.id}>${i.id} · ${t(i.name)}</option>`)}
+        </select>
+        <select aria-label=${L('按状态筛选', 'Filter by status')} value=${status} onChange=${(e) => { listScroll.current = 0; setStatus(e.target.value); }}>
+          <option value="">${L('全部状态', 'All statuses')}</option>
+          ${Object.keys(d.byStatus).map((s) => html`<option value=${s}>${stLabel(s)}</option>`)}
+        </select>
+      </div>
+      <div class="row"><span class="tiny mut" role="status">${L(`${nodes.length} 条假设 · 点卡片查看详情与实验`, `${nodes.length} hypotheses · tap for details and experiments`)}</span>
+        ${(search || idea || status) && html`<button class="btn xs" onClick=${() => { setSearch(''); setIdea(''); setStatus(''); }}>${L('清除筛选', 'Clear filters')}</button>`}</div>
+    </div>
+    <div class="hyp-mobile-list">
+      ${nodes.map((n) => html`<button key=${n.id} class="hyp-list-card" onClick=${() => open(n.id)}>
+        <span class="row"><span class="mono b">${n.id}</span><${St} s=${n.status} /><span class="grow"></span><${Score} v=${n.score} /></span>
+        <span class="hyp-list-claim">${t(n.claim)}</span>
+        <span class="row"><span class="tiny mut">${n.ideas.join(' · ')}</span><span class="grow"></span><span class="hyp-list-open">${L('详情与实验 →', 'Details & runs →')}</span></span>
+      </button>`)}
+      ${!nodes.length && html`<${Empty}>${L('没有匹配的假设，试试其他关键词或清除筛选。', 'No matching hypotheses. Try another search or clear the filters.')}<//>`}
     </div>
   <//>`;
 }
@@ -207,6 +275,7 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
   const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
   const onWheel = (e) => {
+    if (mobile && !interact) return;
     e.preventDefault();
     const k = e.deltaY > 0 ? 1.12 : 1 / 1.12;
     const r = wrap.current.getBoundingClientRect();
@@ -302,9 +371,32 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
 export function HypPanel({ sel, act, compact }) {
   const [adding, setAdding] = useState(false);
   const [txt, setTxt] = useState('');
+  const actions = html`<div class=${compact ? 'hyp-detail-actions' : ''}>
+    <div class="row">
+      ${sel.status !== 'pending_review' && html`<button class="btn sm acc" onClick=${() => act('exp.run', { hyp: sel.id })}>${L('运行实验', 'Run an experiment')}</button>`}
+      <button class="btn sm" onClick=${() => setAdding(!adding)}>${L('添加子假设', 'Add a sub-hypothesis')}</button>
+      ${sel.status === 'pending_review'
+        ? html`<a class="btn sm pri" href=${'/review?h=' + sel.id}>${L('去裁定', 'Rule on it')}</a>`
+        : html`<button class="btn sm" onClick=${() => act('hyp.submit', { hyp: sel.id })}>${L('提交裁定', 'Submit for verdict')}</button>`}
+      <button class="btn sm" onClick=${() => act('hyp.borrow', { hyp: sel.id, idea: sel.ideas[0]?.idea })}>${L('标为借用前提', 'Mark as borrowed')}</button>
+      <a class="btn sm" href=${'/tree?idea=' + (sel.ideas[0]?.idea || 'P-014') + '&h=' + sel.id}>${L('树视图', 'Tree view')}</a>
+    </div>
+    ${adding && html`<div class="row" style="margin-top:9px">
+      <input type="text" value=${txt} placeholder=${L('新假设的主张…', 'The new hypothesis’ claim…')} onInput=${(e) => setTxt(e.target.value)}
+        onKeyDown=${async (e) => { if (e.key === 'Enter' && txt.trim()) { await act('hyp.addChild', { idea: sel.ideas[0]?.idea, parentHyp: sel.id, claim: txt.trim() }); setTxt(''); setAdding(false); } }} />
+      <button class="btn sm acc" disabled=${!txt.trim()} onClick=${async () => { await act('hyp.addChild', { idea: sel.ideas[0]?.idea, parentHyp: sel.id, claim: txt.trim() }); setTxt(''); setAdding(false); }}>${L('添加', 'Add')}</button>
+    </div>`}
+  </div>`;
   return html`<${Card} title=${html`<span class="mono">${sel.id}</span>`} right=${html`<${Score} v=${sel.score} />`}
     sub=${html`<${St} s=${sel.status} />`}>
     <div style="line-height:1.7">${t(sel.claim)}</div>
+    ${compact && actions}
+    ${compact && html`<div class="hyp-current-runs">
+      <div class="tiny mut">${L('当前实验', 'Current experiments')}</div>
+      ${sel.running.length ? sel.running.map((r) => html`<a class="hyp-run-link" href=${'/experiments?e=' + r.id}>
+        <span class="mono b">${r.id}</span><span>${stLabel(r.status)}</span><span>${Math.round((r.prog || 0) * 100)}%</span><span>→</span>
+      </a>`) : html`<div class="small faint">${L('暂无运行或排队的实验', 'No running or queued experiments')}</div>`}
+    </div>`}
     ${sel.warrant && html`<div class="note" style="margin-top:8px"><span class="chip">WARRANT</span> ${t(sel.warrant)}</div>`}
     ${sel.narrow && html`<div class="note acc" style="margin-top:8px">${L('裁定已收窄适用范围：', 'The verdict narrowed its scope: ')}${t(sel.narrow)}</div>`}
     <div class="hr"></div>
@@ -323,24 +415,11 @@ export function HypPanel({ sel, act, compact }) {
       <div style="margin-top:7px"><${Evidence} list=${sel.evidence} onExp=${(e) => e.startsWith('e_') && go('/experiments?e=' + e)} /></div>
       <div style="margin-top:9px"><${Meter} v=${sel.score} /></div>
     <//>`}
-    ${sel.running.length > 0 && html`<div class="note acc" style="margin-top:9px">
+    ${!compact && sel.running.length > 0 && html`<div class="note acc" style="margin-top:9px">
       ${sel.running.map((r) => html`<div class="row"><span class="spin"></span><span class="mono small">${r.id}</span><span class="small">${stLabel(r.status)}</span>
         <div class="grow"></div><span class="small">${Math.round((r.prog || 0) * 100)}%</span></div>`)}</div>`}
     <div class="hr"></div>
-    <div class="row">
-      ${sel.status !== 'pending_review' && html`<button class="btn sm acc" onClick=${() => act('exp.run', { hyp: sel.id })}>${L('运行实验', 'Run an experiment')}</button>`}
-      <button class="btn sm" onClick=${() => setAdding(!adding)}>${L('添加子假设', 'Add a sub-hypothesis')}</button>
-      ${sel.status === 'pending_review'
-        ? html`<a class="btn sm pri" href=${'/review?h=' + sel.id}>${L('去裁定', 'Rule on it')}</a>`
-        : html`<button class="btn sm" onClick=${() => act('hyp.submit', { hyp: sel.id })}>${L('提交裁定', 'Submit for verdict')}</button>`}
-      <button class="btn sm" onClick=${() => act('hyp.borrow', { hyp: sel.id, idea: sel.ideas[0]?.idea })}>${L('标为借用前提', 'Mark as borrowed')}</button>
-      <a class="btn sm" href=${'/tree?idea=' + (sel.ideas[0]?.idea || 'P-014') + '&h=' + sel.id}>${L('树视图', 'Tree view')}</a>
-    </div>
-    ${adding && html`<div class="row" style="margin-top:9px">
-      <input type="text" value=${txt} placeholder=${L('新假设的主张…', 'The new hypothesis’ claim…')} onInput=${(e) => setTxt(e.target.value)}
-        onKeyDown=${async (e) => { if (e.key === 'Enter' && txt.trim()) { await act('hyp.addChild', { idea: sel.ideas[0]?.idea, parentHyp: sel.id, claim: txt.trim() }); setTxt(''); setAdding(false); } }} />
-      <button class="btn sm acc" disabled=${!txt.trim()} onClick=${async () => { await act('hyp.addChild', { idea: sel.ideas[0]?.idea, parentHyp: sel.id, claim: txt.trim() }); setTxt(''); setAdding(false); }}>${L('添加', 'Add')}</button>
-    </div>`}
+    ${!compact && actions}
   <//>`;
 }
 

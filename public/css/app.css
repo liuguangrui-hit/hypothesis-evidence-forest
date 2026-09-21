@@ -346,8 +346,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--acc);outline:none}
   .modal .ft{flex-wrap:wrap}
   .toasts{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:none}
   .mobile-only{display:block}
-  .graph-picker{margin-bottom:12px}
-  .graph-picker select{margin-top:6px}
   .canvas .zoomer{left:8px;right:8px;top:8px;justify-content:flex-end;flex-wrap:wrap}
   .canvas .zoomer .btn{padding:6px 10px}
   .canvas svg.touch-scroll{touch-action:pan-y pinch-zoom;cursor:default}
@@ -377,4 +375,27 @@ input:focus,textarea:focus,select:focus{border-color:var(--acc);outline:none}
   .lnav{gap:8px;padding-inline:12px}
   .lnav .brand span{font-size:13px!important}
   .lnav .brand svg{display:none}
+}
+
+/* Mobile hypotheses: a list/detail flow, with the graph on its own optional screen. */
+@media (max-width:760px){
+  .app:has(.hyp-mobile-title){height:100dvh;min-height:0}
+  .body:has(.hyp-mobile-title){overflow:hidden}
+  .main:has(.hyp-mobile-title)>.scroll{min-height:0;overscroll-behavior-y:contain}
+  .hyp-mobile-title{margin:0;font-size:15px;line-height:1.4;outline:none}
+  .hyp-filters{display:grid;gap:10px;margin-bottom:12px}
+  .hyp-filters input{width:100%;min-height:46px;font-size:16px}
+  .hyp-filter-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+  .hyp-filter-row select{min-width:0;width:100%}
+  .hyp-mobile-list{display:grid;gap:10px}
+  .hyp-list-card{display:grid;gap:10px;width:100%;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;touch-action:pan-y}
+  .hyp-list-card:active{background:var(--accbg)}
+  .hyp-list-card .row{flex-wrap:wrap}
+  .hyp-list-claim{font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+  .hyp-list-open{color:var(--acc);font-size:12px}
+  .hyp-detail-actions{margin-top:14px;padding:12px 0;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+  .hyp-detail-actions>.row:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .hyp-detail-actions .btn{width:100%}
+  .hyp-current-runs{display:grid;gap:8px;margin-top:12px}
+  .hyp-run-link{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:8px 10px;background:var(--accbg);border-radius:6px;color:var(--acc)}
 }
