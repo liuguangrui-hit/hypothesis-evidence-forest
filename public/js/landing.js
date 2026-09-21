@@ -48,6 +48,7 @@ export function Landing({ about }) {
 
     <header class="hero" id="main">
       <span class="pill"><span style="width:6px;height:6px;border-radius:50%;background:#7DA2FF"></span>${L('自动化科研系统', 'Autonomous research system')}</span>
+      ${(!live || live.shell?.source?.mode === 'demo') && html`<p>${L('公开演示：演示数据与模拟实验，不调用真实模型或实验执行器。每位访客独立工作区，试玩记录可能重置。', 'Public demo: demo data and simulated experiments, with no live models or experiment executors. Each visitor has a private workspace; trial data may reset.')}</p>`}
       <h1>${L(html`读文献、提假设、跑实验、写论文<br/>整条科研链路，<em>它自己跑完</em>`, html`From reading papers to writing one —<br/>the whole research chain, <em>on its own</em>`)}</h1>
       <p>${L('8 个课题并行推进，56 条假设共用同一张网络。人只做三件事：给方向、裁定假设、拍板投稿。',
         'Eight projects run in parallel over one shared network of 56 hypotheses. You do three things: set the direction, rule on hypotheses, and decide when to submit.')}</p>

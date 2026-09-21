@@ -1,0 +1,19 @@
+# Public demo only. No database, persistent disk, model keys, or project mounts.
+services:
+  - type: web
+    name: hypothesis-evidence-forest
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24.18.0"
+      - key: NODE_ENV
+        value: production
+      - key: AIS_SOURCE
+        value: demo

@@ -125,7 +125,7 @@ function Top({ screen, shell, onMenu }) {
 // Which data you are looking at: the private demo workspace, or a live project
 // directory on disk (read-only when the process cannot write to it).
 function SourceBadge({ src }) {
-  if (!src || src.mode === 'demo') return html`<span class="chip hide-s" title=${L('演示数据 · 每位访客一份，随时可重置', 'Demo data · private to you, reset any time')}>${L('演示数据', 'Demo data')}</span>`;
+  if (!src || src.mode === 'demo') return html`<span class="chip" title=${L('每位访客独立会话；不调用真实模型或实验执行器。试玩记录可能重置。', 'Private session per visitor; no live models or experiment executors. Trial data may reset.')}>${L('演示数据 · 模拟实验', 'Demo data · simulated experiments')}</span>`;
   const bad = src.problems > 0;
   return html`<span class=${'chip ' + (bad ? 'warn' : 'ok')} title=${L('接入的真实项目目录', 'The live project directory in use')}>
     ${src.readonly ? L('真实项目 · 只读', 'Live project · read-only') : L('真实项目', 'Live project')}

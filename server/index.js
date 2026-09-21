@@ -148,6 +148,6 @@ const server = createServer(async (req, res) => {
 store.sweepOld();
 setInterval(store.sweepOld, 6 * 3600 * 1000).unref?.();
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`AI Scientist workbench → http://localhost:${PORT}`);
 });

@@ -132,6 +132,18 @@ API 只有两个端点：`GET /api/view?screen=<name>` 返回一屏需要的全�
 
 ## 部署
 
+仓库提供 [render.yaml](render.yaml)，用于 Render 免费 Node.js Web Service：
+`main` 分支，`npm install` 构建，`npm start` 启动，`/api/health` 健康检查。
+服务监听 `0.0.0.0:$PORT`，固定 `AIS_SOURCE=demo`，每位访客独立会话。
+公开演示只使用演示数据与模拟实验；不配置真实项目目录、模型密钥或真实实验执行器。
+
+通过 GitHub 连接创建服务后，向 `main` 正常推送即可触发自动部署；更新前运行 `npm test`。
+仅从公共 Git URL 创建的服务需在 Render 手动部署最新提交。
+免费服务无访问 15 分钟后休眠，下次访问冷启动约一分钟；休眠、重启或重新部署会重置试玩记录。
+每个工作区每月共享 750 免费实例小时，另有流量及构建额度；不要启用付费实例、磁盘或数据库。
+未添加付款方式时，额度耗尽会暂停服务或构建；已绑定付款方式的工作区可能产生超额费用。
+详见 [Render 免费方案限制](https://render.com/docs/free)。
+
 单个 Node 进程，前面挂任意反向代理即可。`data/sessions/` 是唯一需要写权限的目录，
 七天后自动清理。多实例部署时替换 `server/store.js` 为共享存储，其余代码不假设本地磁盘。
 

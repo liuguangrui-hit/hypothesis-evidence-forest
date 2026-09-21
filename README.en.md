@@ -142,6 +142,20 @@ lives on the server**, so the screens stay consistent with each other by constru
 
 ## Deploying
 
+The included [render.yaml](render.yaml) configures a free Render Node.js Web Service:
+branch `main`, build `npm install`, start `npm start`, and health check `/api/health`.
+The server binds to `0.0.0.0:$PORT` with `AIS_SOURCE=demo` and a private session per visitor.
+The public demo uses demo data and simulated experiments only. Do not configure real project
+directories, model API keys, or live experiment executors.
+
+When connected through GitHub, normal pushes to `main` trigger deployment; run `npm test` before updating.
+Services created from a public Git URL require a manual deployment of the latest commit in Render.
+Free services sleep after 15 idle minutes and take about a minute to wake up. Sleep, restarts,
+and redeploys reset trial data. A workspace shares 750 free instance hours per month, with separate
+bandwidth and build allowances. Do not enable paid instances, disks, or databases.
+Without a payment method, exhausted allowances suspend services or builds; a workspace with a
+payment method can incur overage charges. See [Render's free plan limits](https://render.com/docs/free).
+
 A single Node process behind any reverse proxy. `data/sessions/` is the only writable
 directory and old sessions are swept after seven days. For a multi-instance deployment,
 replace `server/store.js` with a shared store — nothing else assumes local disk.
