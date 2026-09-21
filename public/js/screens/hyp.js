@@ -254,9 +254,13 @@ function Graph({ d, color, hidden, labels, sel, onPick }) {
   useEffect(() => {
     const f = () => {
       const narrow = matchMedia('(max-width:760px)').matches;
+      const width = wrap.current?.clientWidth || 900;
       setMobile(narrow);
-      setH(narrow ? Math.min(480, Math.max(300, Math.round(innerHeight * .5))) : Math.max(420, innerHeight - 190));
-      setW(wrap.current?.clientWidth || 900);
+      // A phone requesting a desktop site reports a very tall virtual viewport.
+      // Bound the graph by its own width as well, instead of filling that height.
+      setH(narrow ? Math.min(480, Math.max(300, Math.round(innerHeight * .5)))
+        : Math.max(420, Math.min(720, innerHeight - 190, Math.round(width * .85))));
+      setW(width);
     };
     const observer = new ResizeObserver(f);
     observer.observe(wrap.current);
