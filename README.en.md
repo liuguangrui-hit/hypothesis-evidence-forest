@@ -2,6 +2,10 @@
 
 English · [中文](README.md)
 
+**[Live demo](https://hypothesis-evidence-forest.onrender.com/)** · [Workbench](https://hypothesis-evidence-forest.onrender.com/main) · [Hypothesis panorama](https://hypothesis-evidence-forest.onrender.com/panorama)
+
+The public demo uses demo data and simulated experiments, with a private workspace per visitor. The free service may take about a minute to wake up, and trial data may reset.
+
 A **working interface** for an autonomous research system: read the literature, form
 hypotheses, run experiments, rule on the evidence, write the paper — the whole chain on one
 shared network of hypotheses. Front end and back end, no dependencies, `npm start`.
@@ -148,8 +152,10 @@ The server binds to `0.0.0.0:$PORT` with `AIS_SOURCE=demo` and a private session
 The public demo uses demo data and simulated experiments only. Do not configure real project
 directories, model API keys, or live experiment executors.
 
-When connected through GitHub, normal pushes to `main` trigger deployment; run `npm test` before updating.
-Services created from a public Git URL require a manual deployment of the latest commit in Render.
+The current live service was created from a public Git URL. To update, run `npm test`, commit and push
+normally to `main`, then choose **Manual Deploy → Deploy latest commit** on the Render service page.
+Wait for a successful deployment and check `/api/health`. If you later connect GitHub and enable
+automatic deployment, normal pushes to `main` will trigger updates.
 Free services sleep after 15 idle minutes and take about a minute to wake up. Sleep, restarts,
 and redeploys reset trial data. A workspace shares 750 free instance hours per month, with separate
 bandwidth and build allowances. Do not enable paid instances, disks, or databases.

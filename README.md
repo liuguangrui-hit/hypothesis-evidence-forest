@@ -2,6 +2,10 @@
 
 [English](README.en.md) · 中文
 
+**[在线体验](https://hypothesis-evidence-forest.onrender.com/)** · [工作台](https://hypothesis-evidence-forest.onrender.com/main) · [假设全景](https://hypothesis-evidence-forest.onrender.com/panorama)
+
+公开演示仅使用演示数据与模拟实验，每位访客拥有独立工作区。免费服务休眠后首次打开可能需要约一分钟，试玩记录可能重置。
+
 一个自动化科研系统的**可操作界面**：读文献、提假设、跑实验、裁定证据、写论文，
 整条链路在同一张假设网络上展开。前后端齐全，零依赖，`npm start` 就能跑。
 
@@ -137,8 +141,9 @@ API 只有两个端点：`GET /api/view?screen=<name>` 返回一屏需要的全�
 服务监听 `0.0.0.0:$PORT`，固定 `AIS_SOURCE=demo`，每位访客独立会话。
 公开演示只使用演示数据与模拟实验；不配置真实项目目录、模型密钥或真实实验执行器。
 
-通过 GitHub 连接创建服务后，向 `main` 正常推送即可触发自动部署；更新前运行 `npm test`。
-仅从公共 Git URL 创建的服务需在 Render 手动部署最新提交。
+当前在线服务从公共 Git URL 创建：更新前运行 `npm test`，正常提交并推送到 `main`，
+然后在 Render 服务页选择 **Manual Deploy → Deploy latest commit**，等待部署成功并检查 `/api/health`。
+如果以后通过 GitHub 连接启用自动部署，向 `main` 正常推送即可触发更新。
 免费服务无访问 15 分钟后休眠，下次访问冷启动约一分钟；休眠、重启或重新部署会重置试玩记录。
 每个工作区每月共享 750 免费实例小时，另有流量及构建额度；不要启用付费实例、磁盘或数据库。
 未添加付款方式时，额度耗尽会暂停服务或构建；已绑定付款方式的工作区可能产生超额费用。
