@@ -1,0 +1,32 @@
+{
+  "name": "hypothesis-evidence-forest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Scientist: a dynamic hypothesis–evidence forest. A working bilingual interface for an autonomous research system — literature, hypotheses, experiments, verdicts and writing on one shared network.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node server/selftest.js",
+    "check-project": "node tools/check-project.js",
+    "demo-project": "AIS_SOURCE=project AIS_PROJECT_DIR=fixtures/project-sample node server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "SEE LICENSE IN README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liuguangrui-hit/hypothesis-evidence-forest.git"
+  },
+  "keywords": [
+    "ai-scientist",
+    "research-automation",
+    "hypothesis-graph",
+    "evidence",
+    "agents",
+    "bilingual",
+    "no-dependencies"
+  ],
+  "author": "Nanyang Technological University, Singapore"
+}

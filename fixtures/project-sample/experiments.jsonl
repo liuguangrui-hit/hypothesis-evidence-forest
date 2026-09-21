@@ -1,0 +1,7 @@
+{"id":"x_01","hyp":"H-1","idea":"P-001","status":"done","started_at":"2026-09-18T03:00:00Z","duration_h":4,"cost":70,"gpu":0,"cfg":{"model":"ResNet-50 / CIFAR-100","batch":"32-512","seed":"0,1,2","opt":"SGD","steps":"40k","measure":"noise scale"},"outcome":{"delta":1.2,"rec":"PROCEED","conf":0.8},"label":"noise scale sweep"}
+{"id":"x_02","hyp":"H-2","idea":"P-001","status":"done","started_at":"2026-09-19T06:00:00Z","duration_h":3,"cost":52,"gpu":1,"outcome":{"delta":-0.8,"rec":"PIVOT","conf":0.6},"label":"small-batch replication"}
+{"id":"x_03","hyp":"H-2","idea":"P-002","status":"running","started_at":"2026-09-21T08:00:00Z","duration_h":6,"progress":0.4,"cost":95,"gpu":0,"label":"narrow-range re-measurement"}
+{"id":"x_04","hyp":"H-4","idea":"P-002","status":"queued","label":"dataset transfer"}
+{"id":"x_05","hyp":"H-9","idea":"P-002","status":"queued","label":"points at a hypothesis that is not in the tree"}
+{"id":"","hyp":"H-1","status":"done"}
+not json at all

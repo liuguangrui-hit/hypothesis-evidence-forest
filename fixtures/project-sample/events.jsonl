@@ -1,0 +1,3 @@
+{"t":"2026-09-19T10:05:00Z","module":"executor","kind":"experiment","title":"x_02 done · H-2 evidence -0.8","detail":"trend did not reproduce","hyp":"H-2","exp":"x_02"}
+{"t":"2026-09-19T14:30:00Z","module":"reviewer","kind":"verdict","title":"H-2 submitted for a verdict","detail":"three PIVOTs with no improvement","hyp":"H-2"}
+{"t":"2026-09-20T09:00:00Z","module":"human","kind":"idea","title":"Approved P-002","detail":"reuses H-2"}

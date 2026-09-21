@@ -1,0 +1,8 @@
+{
+  "idea": "P-001",
+  "title": "P-001 Geometric correction",
+  "sections": [
+    { "k": "1", "title": "Introduction", "hyps": ["H-1"], "status": "ok", "paras": ["Small-batch training degrades the effective step."] },
+    { "k": "2", "title": "Method", "hyps": ["H-2", "H-3"], "status": "missing", "paras": ["We add a geometric correction term."] }
+  ]
+}

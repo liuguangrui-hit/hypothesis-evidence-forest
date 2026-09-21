@@ -1,0 +1,21 @@
+# whitelist read by the collection pipeline
+- id: NEURIPS
+  name: NeurIPS
+  type: conf
+  level: CCF-A
+  scan: core
+  entry: papers.nips.cc
+  cursor: "2025"
+  added: 14
+- id: TMLR
+  name: TMLR
+  type: journal
+  scan: watch
+  entry: openreview
+  cursor: "2026"
+  added: 3
+- id: BROKEN
+  name: A venue whose entry stopped working
+  type: journal
+  scan: core
+  status: broken

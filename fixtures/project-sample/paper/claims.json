@@ -1,0 +1,5 @@
+[
+  { "id": "c1", "sec": "1", "text": "Small-batch training degrades the effective step", "hyp": "H-1", "ev": ["x_01"], "status": "supported" },
+  { "id": "c2", "sec": "2", "text": "The correction works for any optimiser", "hyp": "H-3", "ev": [], "status": "overclaim",
+    "why": "only tested on SGD", "soften": "The correction works on SGD." }
+]
