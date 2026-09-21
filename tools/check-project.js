@@ -22,11 +22,14 @@ console.log(`${n(ws.events.length)}  events         ${Object.keys(ws.verdicts).l
 console.log(`${n(ws.paper.sections.length)}  sections       ${ws.claims.items.length} claims`);
 console.log(`${n(E.frontier(ws).length)}  on frontier    ${E.pendingVerdicts(ws).length} awaiting a verdict`);
 
+const SCREENS = ['home', 'main', 'survey', 'trends', 'sparks', 'digest', 'ideas', 'panorama', 'graph', 'tree',
+  'experiments', 'exptree', 'sweep', 'runs', 'review', 'paper', 'claims', 'figures', 'rebuttal', 'events'];
 let broken = 0;
-for (const s of ['home', 'main', 'survey', 'sparks', 'ideas', 'panorama', 'graph', 'tree', 'experiments', 'exptree', 'sweep', 'runs', 'review', 'paper', 'claims', 'figures', 'rebuttal', 'events']) {
-  try { V[s](ws); } catch (e) { broken++; console.log(`\n  screen "${s}" failed: ${e.message}`); }
+for (const s of SCREENS) {
+  try { s === 'digest' ? V.digest(ws, Object.keys(ws.papers)[0]) : V[s](ws); }
+  catch (e) { broken++; console.log(`\n  screen "${s}" failed: ${e.message}`); }
 }
-console.log(`\n${n(18 - broken)}  screens render` + (broken ? `  (${broken} failed — please report)` : ''));
+console.log(`\n${n(SCREENS.length - broken)}  screens render` + (broken ? `  (${broken} failed — please report)` : ''));
 
 if (problems.length) {
   console.log(`\n${problems.length} problem(s):`);
