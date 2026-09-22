@@ -2,7 +2,7 @@
 
 English · [中文](README.md)
 
-**[Live demo](https://hypothesis-evidence-forest.onrender.com/)** · [Workbench](https://hypothesis-evidence-forest.onrender.com/main) · [Hypothesis panorama](https://hypothesis-evidence-forest.onrender.com/panorama)
+**[Live demo](https://hypothesis-evidence-forest.onrender.com/)** · [Workbench](https://hypothesis-evidence-forest.onrender.com/main) · [Hypothesis panorama](https://hypothesis-evidence-forest.onrender.com/panorama) · [Large-scale structure visualisation](https://github.com/liuguangrui-hit/hypothesis-forest-3d)
 
 The public demo uses demo data and simulated experiments, with a private workspace per visitor. The free service may take about a minute to wake up, and trial data may reset.
 
@@ -112,6 +112,15 @@ The full field contract is in [docs/DATA.md](docs/DATA.md).
 | --- | --- |
 | [docs/CONCEPTS.md](docs/CONCEPTS.md) | the forest model: shared hypotheses, signed evidence, how a verdict propagates |
 | [docs/DATA.md](docs/DATA.md) | the file contract for connecting a real project |
+
+---
+
+## Related project
+
+**[hypothesis-forest-3d](https://github.com/liuguangrui-hit/hypothesis-forest-3d)** — a 2D and 3D structure visualisation of this workbench's hypothesis-tree
+model at scale: dozens of ideas, close to a thousand hypotheses and over two thousand signed pieces of
+evidence, with shared hypotheses, evidence flow and verdict propagation visible and every node draggable
+with inertia. No dependencies — clone it and open `index.html`.
 
 ---
 

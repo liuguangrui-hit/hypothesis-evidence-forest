@@ -2,7 +2,7 @@
 
 [English](README.en.md) · 中文
 
-**[在线体验](https://hypothesis-evidence-forest.onrender.com/)** · [工作台](https://hypothesis-evidence-forest.onrender.com/main) · [假设全景](https://hypothesis-evidence-forest.onrender.com/panorama)
+**[在线体验](https://hypothesis-evidence-forest.onrender.com/)** · [工作台](https://hypothesis-evidence-forest.onrender.com/main) · [假设全景](https://hypothesis-evidence-forest.onrender.com/panorama) · [大规模结构可视化](https://github.com/liuguangrui-hit/hypothesis-forest-3d)
 
 公开演示仅使用演示数据与模拟实验，每位访客拥有独立工作区。免费服务休眠后首次打开可能需要约一分钟，试玩记录可能重置。
 
@@ -102,6 +102,14 @@ npm run demo-project                     # 用仓库自带的样例目录试试
 | --- | --- |
 | [docs/CONCEPTS.zh-CN.md](docs/CONCEPTS.zh-CN.md) | 森林模型详解：共享假设、带符号证据、裁定如何传播 |
 | [docs/DATA.md](docs/DATA.md) | 接入真实项目的文件契约（英文） |
+
+---
+
+## 相关项目
+
+**[hypothesis-forest-3d](https://github.com/liuguangrui-hit/hypothesis-forest-3d)** —— 本工作台假设树模型在大规模下的二维与三维结构可视化：
+数十个 idea、近千条假设、两千余条带符号证据；共享假设、证据流与裁定传播均可见，节点可拖动并保留惯性。
+零依赖，克隆后双击 `index.html` 即可打开。
 
 ---
 
